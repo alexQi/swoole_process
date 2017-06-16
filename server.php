@@ -11,8 +11,6 @@ class Server
     public function __construct(){
         error_reporting(E_ALL^E_NOTICE);
         require_once "./src/client.php";
-        $this->client = new Beanstalk\Client();
-        $this->client->connect();
 
         try {
             swoole_set_process_name(sprintf('php-ps:%s', 'master'));
@@ -38,11 +36,14 @@ class Server
             {
                 $this->checkMpid($worker);
                 sleep(1);
+                $this->client = new Beanstalk\Client();
+                $this->client->connect();
                 if(!$this->activeSubProcess())
                 {
                     echo "Waiting for the data ...\n";
                     continue;
                 }
+                $this->client->disconnect();
             }
 
         }, false, false);
@@ -59,7 +60,6 @@ class Server
         $this->client->ignore('default');
         $tubeList = $this->client->listTubes();
 
-        var_dump($tubeList);
         if (!empty($tubeList))
         {
             foreach($tubeList as $tube)
@@ -101,20 +101,15 @@ class Server
         }
 
         while (true) {
-
-            var_dump($stats['current-jobs-ready']);
+            var_dump($stats);
             if ($stats['current-jobs-ready'] == 0){
                 break;
             }
             $job = $this->client->reserve();
-
             //处理任务
-            var_dump($job);
+            echo $job['body'];
 
-            var_dump($this->client->delete($job['id']));
-
-            //休眠任务
-//          $this->client->bury($job['id']);
+            $this->client->delete($job['id']);
         }
         echo "finish process data\n";
     }
