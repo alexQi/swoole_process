@@ -12,7 +12,6 @@ class swooleServer
     public function __construct(){
         try {
             swoole_set_process_name(sprintf('php-ps:%s', 'master process ('.(__FILE__).')'));
-
             $this->masterPid = posix_getpid();
             $this->run();
             $this->processWait();
@@ -22,7 +21,7 @@ class swooleServer
     }
 
     public function run(){
-        $manageProcess = new swoole_process(function(){
+        $manageProcess = new swoole_process(function(swoole_process $process){
             swoole_set_process_name(sprintf('php-ps:%s', 'manage process'));
 
             $i = 0;
@@ -31,22 +30,22 @@ class swooleServer
                 if (count($this->works)<5){
                     $this->createProcess($i);
                     $i++;
+                    #回收子进程
+                    while($ret =  swoole_process::wait()) {
+                        $process->exit();
+                    }
                 }
             }
 
         },false,false);
         $this->managePid = $manageProcess->start();
 
-        var_dump(111);
-        #回收子进程
-        while($ret =  swoole_process::wait()) {
-            echo "PID={$ret['pid']}\n";
-        }
+
     }
 
     public function createProcess($i){
         $Process = new swoole_process(function(swoole_process $worker)use ($i){
-            swoole_set_process_name(sprintf('php-ps:%s', 'child process'.$i));
+            swoole_set_process_name(sprintf('php-ps:%s', 'child process '.$i));
             $n = 0;
             while ($n < $i+1){
                 echo "msg: {$n}\n";

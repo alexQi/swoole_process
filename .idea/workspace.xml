@@ -2,10 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4aa86973-bb43-477b-8a56-4d62364cf80f" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/swooleServer.php" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/README.md" afterPath="$PROJECT_DIR$/README.md" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/server.php" afterPath="$PROJECT_DIR$/server.php" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/swooleServer.php" afterPath="$PROJECT_DIR$/swooleServer.php" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -53,8 +50,8 @@
       <file leaf-file-name="swooleServer.php" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/swooleServer.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="702">
-              <caret line="39" column="22" lean-forward="false" selection-start-line="39" selection-start-column="22" selection-end-line="39" selection-end-column="22" />
+            <state relative-caret-position="379">
+              <caret line="34" column="41" lean-forward="false" selection-start-line="34" selection-start-column="41" selection-end-line="34" selection-end-column="41" />
               <folding />
             </state>
           </provider>
@@ -314,12 +311,12 @@
       <updated>1497580436371</updated>
       <workItem from="1497580437679" duration="5814000" />
       <workItem from="1497591274992" duration="15248000" />
-      <workItem from="1497834520957" duration="13836000" />
+      <workItem from="1497834520957" duration="14449000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="34898000" />
+    <option name="totallyTimeSpent" value="35511000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -483,8 +480,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/swooleServer.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="702">
-          <caret line="39" column="22" lean-forward="false" selection-start-line="39" selection-start-column="22" selection-end-line="39" selection-end-column="22" />
+        <state relative-caret-position="379">
+          <caret line="34" column="41" lean-forward="false" selection-start-line="34" selection-start-column="41" selection-end-line="34" selection-end-column="41" />
           <folding />
         </state>
       </provider>
