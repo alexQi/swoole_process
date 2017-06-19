@@ -1,4 +1,7 @@
 <?php
+declare(ticks = 1);
+error_reporting(E_ALL^E_NOTICE);
+
 
 class Server
 {
@@ -9,7 +12,14 @@ class Server
     public $new_index=0;
 
     public function __construct(){
-        error_reporting(E_ALL^E_NOTICE);
+        swoole_process::signal(SIGTERM, function($sig) {
+            //必须为false，非阻塞模式
+            while($ret =  swoole_process::wait(false)) {
+                echo "PID={$ret['pid']}\n";
+            }
+        });
+
+
         require_once "./src/client.php";
 
         try {
@@ -101,13 +111,12 @@ class Server
         }
 
         while (true) {
-            var_dump($stats);
             if ($stats['current-jobs-ready'] == 0){
                 break;
             }
             $job = $this->client->reserve();
             //处理任务
-            echo $job['body'];
+            echo $job['body']."\n";
 
             $this->client->delete($job['id']);
         }
@@ -147,5 +156,4 @@ class Server
         }
     }
 }
-
 $server = new Server();
