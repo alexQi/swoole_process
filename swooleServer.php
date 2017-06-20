@@ -1,15 +1,22 @@
 <?php
-declare(ticks = 1);
+ini_set('default_socket_timeout', -1);
 
 class swooleServer
 {
-    public $masterPid = 0;
-    public $managePid = 0;
+    public $redis;
+    public $masterPid  = 0;
+    public $startTime  = 0;
+    public $masterPipe = 0;
+    public $new_index  = 0;
     public $works = [];
-    public $max_precess = 1;
-    public $new_index = 0;
+
 
     public function __construct(){
+        $redis = new Redis();
+        $redis->connect('127.0.0.1','6379');
+        $redis->auth('6da192c7dd56a5ba917c59d2e723911a');
+        $this->redis     = $redis;
+
         try {
             swoole_set_process_name(sprintf('php-ps:%s', 'master process ('.(__FILE__).')'));
             $this->masterPid = posix_getpid();
@@ -21,53 +28,78 @@ class swooleServer
     }
 
     public function run(){
-        $manageProcess = new swoole_process(function(swoole_process $process){
-            swoole_set_process_name(sprintf('php-ps:%s', 'manage process'));
-
-            $i = 0;
-            while (true)
-            {
-                if (count($this->works)<5){
-                    $this->createProcess($i);
-                    $i++;
-                    #回收子进程
-                    while($ret =  swoole_process::wait()) {
-                        $process->exit();
-                    }
-                }
-            }
-
-        },false,false);
-        $this->managePid = $manageProcess->start();
-
-
+        for($n=0;$n<3;$n++)
+        {
+            $this->createProcess($n);
+        }
     }
 
-    public function createProcess($i){
-        $Process = new swoole_process(function(swoole_process $worker)use ($i){
-            swoole_set_process_name(sprintf('php-ps:%s', 'child process '.$i));
-            $n = 0;
-            while ($n < $i+1){
-                echo "msg: {$n}\n";
-                sleep(1);
-                $n++;
+    public function createProcess($n){
+        $manageProcess = new swoole_process(function(swoole_process $process)use($n){
+            $process->name(sprintf('php-ps:%s', 'child process '.$n));
+            $this->handleData($n);
+            echo "ID:$process->pid --> Process data Fninsh........\n";
+            $this->checkMpid($process);
+        });
+        $managePid = $manageProcess->start();
+        $this->works[$n] = $managePid;
+    }
+
+    public function handleDataPush($n){
+        $counter = 0;
+        while (True){
+            $this->redis->lPush('num-'.$n,1);
+            if ($counter==20000){
+                break;
             }
-        },false,false);
-        $this->works[] = $Process->start();
+            $counter++;
+        }
+    }
+
+    public function handleData($n){
+        $counter = 0;
+        while (True){
+            $res = $this->redis->lPop('num-'.$n);
+            if (!$res){
+                break;
+            }
+
+            /**
+             * 模拟业务逻辑处理所需时间
+             */
+//            $a = [];
+//            for ($g=1;$g<100000;$g++){
+//                $a[] = $g;
+//            }
+
+            $this->redis->lPush('num-res',$res);
+
+            if ($counter==20000){
+                break;
+            }
+            $counter++;
+        }
+    }
+
+    public function checkMpid(swoole_process $worker){
+        if (!swoole_process::kill($this->masterPid,0)){
+            $worker->exit();
+        }
+    }
+
+    public function rebootProcess($pid){
+        $index = array_search($pid, $this->works);
+        if($index!==false){
+            $index   = intval($index);
+            $new_pid = $this->createProcess($index);
+            echo "rebootProcess: {$index}={$new_pid} Done\n";
+            return;
+        }
     }
 
     public function processWait(){
-        while(true) {
-            if($this->masterPid)
-            {
-                $ret = swoole_process::wait();
-                if ($ret) {
-                    echo "manage process has been rebooted\n";
-                    $this->run();
-                }
-            }else{
-                break;
-            }
+        while ($ret = swoole_process::wait()){
+            $this->rebootProcess($ret['pid']);
         }
     }
 }
